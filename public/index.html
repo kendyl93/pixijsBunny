@@ -19,7 +19,6 @@
       const APP_ROOT = document.querySelector('.app-root');
       const BUNNY_SRC =
         'https://s3-us-west-2.amazonaws.com/s.cdpn.io/693612/IaUrttj.png';
-
       const DEFAULT_INPUTS = [
         {
           id: 'amount',
@@ -50,6 +49,8 @@
           label: 'Bunny Rotation'
         }
       ];
+
+      const findAmount = ({ id }) => id === 'amount';
 
       class BunnyItem extends PIXI.Sprite {
         constructor(id) {
@@ -124,10 +125,9 @@
         const prevInputs = usePrevious(inputs);
 
         React.useEffect(() => {
-          const amount = Number(inputs.find(({ id }) => id === 'amount').value);
+          const amount = Number(inputs.find(findAmount).value);
           const prevAmountInput =
-            prevInputs &&
-            Number(prevInputs.find(({ id }) => id === 'amount').value);
+            prevInputs && Number(prevInputs.find(findAmount).value);
 
           if (prevAmountInput) {
             if (amount > prevAmountInput) {
@@ -145,7 +145,7 @@
           const inputsWithoutAmount = inputs.filter(
             ({ id }) => id !== 'amount'
           );
-          const amountInput = inputs.find(({ id }) => id === 'amount');
+          const amountInput = inputs.find(findAmount);
 
           const updatedAmountInput = {
             id: 'amount',
