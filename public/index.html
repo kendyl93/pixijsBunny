@@ -52,6 +52,16 @@
 
       const findAmount = ({ id }) => id === 'amount';
 
+      const usePrevious = value => {
+        const ref = React.useRef();
+
+        React.useEffect(() => {
+          ref.current = value;
+        });
+
+        return ref.current;
+      };
+
       class BunnyItem extends PIXI.Sprite {
         constructor(id) {
           super(PIXI.Texture.from(BUNNY_SRC));
@@ -111,31 +121,29 @@
         }
       }
 
-      const usePrevious = value => {
-        const ref = React.useRef();
-        React.useEffect(() => {
-          ref.current = value;
-        });
-        return ref.current;
-      };
-
       const BunnyListInputs = ({ canvas }) => {
         const [itemsSelected, setItemsSelected] = React.useState([]);
         const [inputs, setInputs] = React.useState(DEFAULT_INPUTS);
         const prevInputs = usePrevious(inputs);
 
+        const operationOnBunnies = (amount, previousAmount) => {
+          const maybeAddOperation = amount > previousAmount;
+
+          maybeAddOperation
+            ? canvas.addBunny(amount)
+            : canvas.removeBunny(amount);
+        };
+
         React.useEffect(() => {
           const amount = Number(inputs.find(findAmount).value);
-          const prevAmountInput =
+          const previousAmount =
             prevInputs && Number(prevInputs.find(findAmount).value);
 
-          if (prevAmountInput) {
-            if (amount > prevAmountInput) {
-              canvas.addBunny(amount);
-            } else {
-              canvas.removeBunny(amount);
-            }
+          if (!previousAmount) {
+            return;
           }
+
+          operationOnBunnies(amount, previousAmount);
         }, [inputs]);
 
         const onChangeAmount = event => {
