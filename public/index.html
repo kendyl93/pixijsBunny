@@ -121,18 +121,18 @@
         }
       }
 
+      const operationOnBunnies = canvas => (amount, previousAmount) => {
+        const maybeAddOperation = amount > previousAmount;
+
+        maybeAddOperation
+          ? canvas.addBunny(amount)
+          : canvas.removeBunny(amount);
+      };
+
       const BunnyListInputs = ({ canvas }) => {
         const [itemsSelected, setItemsSelected] = React.useState([]);
         const [inputs, setInputs] = React.useState(DEFAULT_INPUTS);
         const prevInputs = usePrevious(inputs);
-
-        const operationOnBunnies = (amount, previousAmount) => {
-          const maybeAddOperation = amount > previousAmount;
-
-          maybeAddOperation
-            ? canvas.addBunny(amount)
-            : canvas.removeBunny(amount);
-        };
 
         React.useEffect(() => {
           const amount = Number(inputs.find(findAmount).value);
@@ -143,7 +143,7 @@
             return;
           }
 
-          operationOnBunnies(amount, previousAmount);
+          operationOnBunnies(canvas)(amount, previousAmount);
         }, [inputs]);
 
         const onChangeAmount = event => {
