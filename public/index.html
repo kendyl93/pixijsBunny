@@ -146,14 +146,17 @@
           );
         }
 
+        renderInputs = inputs => inputs.map(input => this.renderInput(input));
+
         render() {
-          let inputs = this.state.inputs;
-          let items_selected = this.state.items_selected;
+          const { renderInputs } = this;
+          const { inputs, items_selected } = this.state;
+          const itemsSelectedCount = items_selected.length;
 
           return (
             <div className="bunny-inputs">
-              {inputs.map(input => this.renderInput(input))}
-              <label>Selected Bunnies: {items_selected.length}</label>
+              {renderInputs(inputs)}
+              <label>Selected Bunnies: {itemsSelectedCount}</label>
             </div>
           );
         }
@@ -164,13 +167,15 @@
           super();
 
           this.canvas = new CanvasApplication();
-          CANVAS_ROOT.appendChild(this.canvas.view);
+          const { view } = this.canvas;
+          CANVAS_ROOT.appendChild(view);
         }
 
         render() {
-          if (!this.canvas) return;
+          const { canvas } = this || {};
+          if (!canvas) return;
 
-          return <BunnyListInputs canvas={this.canvas} />;
+          return <BunnyListInputs canvas={canvas} />;
         }
       }
 
