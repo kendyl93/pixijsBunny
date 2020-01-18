@@ -1,0 +1,15 @@
+{
+  "name": "softjurn",
+  "version": "1.0.0",
+  "description": "Exercise for SoftJurn recruiting process",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Pawel Stanecki",
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^4.17.1"
+  }
+}
