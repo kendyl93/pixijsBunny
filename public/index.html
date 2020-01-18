@@ -125,9 +125,17 @@
 
         React.useEffect(() => {
           const amount = Number(inputs.find(({ id }) => id === 'amount').value);
-          console.log({ amount, inputs, prevInputs });
-          //TODO: check prev and next state
-          //resolve if add or remove bunny
+          const prevAmountInput =
+            prevInputs &&
+            Number(prevInputs.find(({ id }) => id === 'amount').value);
+
+          if (prevAmountInput) {
+            if (amount > prevAmountInput) {
+              canvas.addBunny(amount);
+            } else {
+              canvas.removeBunny(amount);
+            }
+          }
         }, [inputs]);
 
         const onChangeAmount = event => {
@@ -138,13 +146,6 @@
             ({ id }) => id !== 'amount'
           );
           const amountInput = inputs.find(({ id }) => id === 'amount');
-
-          //TODO: render number of child after setInputs
-          if (Number(value) > amountInput.value) {
-            canvas.addBunny(Number(value));
-          } else {
-            canvas.removeBunny(Number(value));
-          }
 
           const updatedAmountInput = {
             id: 'amount',
