@@ -144,12 +144,12 @@
           this.stage.removeChildAt(sourceId);
         }
 
-        selectBunny = bunny => {
-          // const maybeSelected = this.bunnies.find(
-          //   sourceBonny => sourceBonny.id === bunny.id
-          // );
-          // const { selected } = maybeSelected;
-          return (bunny.selected = true);
+        selectBunny = id => {
+          const bunny = this.bunnies.find(
+            ({ id: sourceId }) => sourceId === id
+          );
+
+          bunny.selected = true;
         };
       }
 
@@ -183,6 +183,7 @@
         console.log({ selectedBunnies });
         const [inputs, setInputs] = React.useState(DEFAULT_INPUTS);
         const prevInputs = usePrevious(inputs);
+        const prevSelected = usePrevious(selectedBunnies);
 
         const onChangeBunniesAmount = (inputs, prevInputs) => {
           const amount = Number(inputs.find(findAmount).value);
@@ -223,16 +224,20 @@
           operationOnBunniesRotation(canvas)(rotation);
         };
 
+        const update = () =>
+          setItemsSelected(
+            canvas.bunnies.filter(bunny => bunny.selected === true)
+          );
+
         React.useEffect(() => {
           canvas.bunnies.map(bunny => {
-            bunny.on('mousedown', function(e) {
-              canvas.selectBunny(bunny);
-
-              setItemsSelected([...itemsSelected, bunny]);
+            bunny.on('mousedown', e => {
+              canvas.selectBunny(bunny.id);
+              update();
             });
           });
 
-          console.log({ canvas });
+          console.log({ prevSelected });
           if (!prevInputs) {
             return;
           }
