@@ -65,6 +65,11 @@
         inputs.find(findScale),
         inputs.find(findRotation)
       ];
+      const RADIAN = Math.PI / 180;
+      const normalizedToDegrees = normalizedRotation =>
+        360 * normalizedRotation;
+      const toRadians = normalizedRotation =>
+        normalizedToDegrees(normalizedRotation) * RADIAN;
 
       const usePrevious = value => {
         const ref = React.useRef();
@@ -143,22 +148,30 @@
           : canvas.removeBunny(amount);
       };
 
-      const operationOnBunniesScale = canvas => sourceScale => {
-        canvas.bunnies.map(({ scale }) => scale.set(sourceScale, sourceScale));
+      const operationOnBunniesScale = ({ bunnies }) => sourceScale => {
+        bunnies.map(({ scale }) => scale.set(sourceScale));
+      };
+
+      const operationOnBunniesRotation = canvas => sourceRotation => {
+        canvas.bunnies.map(bunny => {
+          bunny.anchor.set(0.5);
+          bunny.rotation = toRadians(sourceRotation);
+        });
       };
 
       const BunnyListInputs = ({ canvas }) => {
         const [itemsSelected, setItemsSelected] = React.useState([]);
         const [inputs, setInputs] = React.useState(DEFAULT_INPUTS);
         const prevInputs = usePrevious(inputs);
+        console.log({ canvas });
 
         const onChangeBunniesAmount = (inputs, prevInputs) => {
           const amount = Number(inputs.find(findAmount).value);
           const previousAmount =
             prevInputs && Number(prevInputs.find(findAmount).value);
-          const maybeAmountChange = previousAmount === amount;
+          const maybeAmountChange = previousAmount !== amount;
 
-          if (maybeAmountChange) {
+          if (!maybeAmountChange) {
             return;
           }
 
@@ -169,13 +182,26 @@
           const scale = Number(inputs.find(findScale).value);
           const previousScale =
             prevInputs && Number(prevInputs.find(findScale).value);
-          const maybeScaleChange = previousScale === scale;
+          const maybeScaleChange = previousScale !== scale;
 
-          if (maybeScaleChange) {
+          if (!maybeScaleChange) {
             return;
           }
 
           operationOnBunniesScale(canvas)(scale);
+        };
+
+        const onChangeBunniesRotation = (inputs, prevInputs) => {
+          const rotation = Number(inputs.find(findRotation).value);
+          const previousRotation =
+            prevInputs && Number(prevInputs.find(findRotation).value);
+          const maybeRotationChange = previousRotation !== rotation;
+
+          if (!maybeRotationChange) {
+            return;
+          }
+
+          operationOnBunniesRotation(canvas)(rotation);
         };
 
         React.useEffect(() => {
@@ -185,6 +211,7 @@
 
           onChangeBunniesAmount(inputs, prevInputs);
           onChangeBunniesScale(inputs, prevInputs);
+          onChangeBunniesRotation(inputs, prevInputs);
         }, [inputs]);
 
         const onChangeAmount = id => event => {
@@ -246,11 +273,7 @@
           );
         };
 
-        const renderInputs = inputs =>
-          inputs.map(input => {
-            console.log({ OO: input, inputs });
-            return renderInput(input);
-          });
+        const renderInputs = inputs => inputs.map(input => renderInput(input));
         const itemsSelectedCount = itemsSelected.length;
 
         return (
