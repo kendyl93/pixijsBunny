@@ -1,4 +1,4 @@
-# SoftJurn Task
+# Bunny PIXI.JS Task
 
 ### Starting the app for the very first time.
 
