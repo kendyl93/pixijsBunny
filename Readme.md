@@ -7,5 +7,9 @@
 3. Start the app `npm run start`.
 4. Open `http://localhost:3000/` in your browser.
 
+### DEMO:
+
+[demo video](https://im7.ezgif.com/tmp/ezgif-7-6c11852c15c9.gif)
+
 Author: Pawel Stanecki,
 email: p.stanecki93@gmail.com
