@@ -6,6 +6,7 @@
 2. Install all dependencies `npm install`.
 3. Start the app `npm run start`.
 4. Open `http://localhost:3000/` in your browser.
+5. Enjoy ! 😁
 
 ### DEMO:
 
