@@ -135,7 +135,7 @@
         }
       }
 
-      const operationOnBunnies = canvas => (amount, previousAmount) => {
+      const operationOnBunniesAmount = canvas => (amount, previousAmount) => {
         const maybeAddOperation = amount > previousAmount;
 
         maybeAddOperation
@@ -143,23 +143,48 @@
           : canvas.removeBunny(amount);
       };
 
+      const operationOnBunniesScale = canvas => sourceScale => {
+        canvas.bunnies.map(({ scale }) => scale.set(sourceScale, sourceScale));
+      };
+
       const BunnyListInputs = ({ canvas }) => {
         const [itemsSelected, setItemsSelected] = React.useState([]);
         const [inputs, setInputs] = React.useState(DEFAULT_INPUTS);
         const prevInputs = usePrevious(inputs);
 
-        React.useEffect(() => {
+        const onChangeBunniesAmount = (inputs, prevInputs) => {
           const amount = Number(inputs.find(findAmount).value);
           const previousAmount =
             prevInputs && Number(prevInputs.find(findAmount).value);
-          const maybeAmountChange =
-            !previousAmount || previousAmount === amount;
+          const maybeAmountChange = previousAmount === amount;
 
           if (maybeAmountChange) {
             return;
           }
 
-          operationOnBunnies(canvas)(amount, previousAmount);
+          operationOnBunniesAmount(canvas)(amount, previousAmount);
+        };
+
+        const onChangeBunniesScale = (inputs, prevInputs) => {
+          const scale = Number(inputs.find(findScale).value);
+          const previousScale =
+            prevInputs && Number(prevInputs.find(findScale).value);
+          const maybeScaleChange = previousScale === scale;
+
+          if (maybeScaleChange) {
+            return;
+          }
+
+          operationOnBunniesScale(canvas)(scale);
+        };
+
+        React.useEffect(() => {
+          if (!prevInputs) {
+            return;
+          }
+
+          onChangeBunniesAmount(inputs, prevInputs);
+          onChangeBunniesScale(inputs, prevInputs);
         }, [inputs]);
 
         const onChangeAmount = id => event => {
