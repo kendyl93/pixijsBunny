@@ -15,6 +15,10 @@
     <div class="canvas-root"></div>
 
     <script type="text/babel">
+      const mapKeys = f => xs =>
+        Object.fromEntries(
+          Object.entries(xs).map(([key, value]) => [f(value, key, xs), value])
+        );
       const CANVAS_ROOT = document.querySelector('.canvas-root');
       const APP_ROOT = document.querySelector('.app-root');
       const BUNNY_SRC =
@@ -51,6 +55,16 @@
       ];
 
       const findAmount = ({ id }) => id === 'amount';
+      const findScale = ({ id }) => id === 'scale';
+      const findRotation = ({ id }) => id === 'rotation';
+
+      const byId = ({ id }) => id;
+
+      const inOrder = inputs => [
+        inputs.find(findAmount),
+        inputs.find(findScale),
+        inputs.find(findRotation)
+      ];
 
       const usePrevious = value => {
         const ref = React.useRef();
@@ -138,15 +152,17 @@
           const amount = Number(inputs.find(findAmount).value);
           const previousAmount =
             prevInputs && Number(prevInputs.find(findAmount).value);
+          const maybeAmountChange =
+            !previousAmount || previousAmount === amount;
 
-          if (!previousAmount) {
+          if (maybeAmountChange) {
             return;
           }
 
           operationOnBunnies(canvas)(amount, previousAmount);
         }, [inputs]);
 
-        const onChangeAmount = event => {
+        const onChangeAmount = id => event => {
           const {
             target: { value }
           } = event;
@@ -160,26 +176,56 @@
             ...amountInput,
             value
           };
+
           setInputs([updatedAmountInput, ...inputsWithoutAmount]);
+        };
+
+        const handleRangeChange = sourceId => event => {
+          const {
+            target: { value }
+          } = event;
+          const inputsWithoutSourceId = inputs.filter(
+            ({ id }) => id !== sourceId
+          );
+          const sourceIdInput = inputs.find(({ id }) => id === sourceId);
+          const updatedSourceIdInput = {
+            id: sourceId,
+            ...sourceIdInput,
+            value
+          };
+
+          const updatedInputs = [
+            updatedSourceIdInput,
+            ...inputsWithoutSourceId
+          ];
+          const inputsInOrder = inOrder(updatedInputs);
+
+          setInputs(inputsInOrder);
+        };
+
+        const OPERATIONS = {
+          amount: onChangeAmount,
+          scale: handleRangeChange,
+          rotation: handleRangeChange
         };
 
         const renderInput = input => {
           const { label, id } = input || {};
-
-          // TODO: Unify the inputs onchange
-          // const onChange = sourceOnChange
-          //   ? sourceOnChange // when a custom handler prop if exists
-          //   : onBunnyChange(id); // else use the generic onChange handler
+          const onChange = OPERATIONS[id](id);
 
           return (
             <div id={`bunny-input-${id}`}>
               <label for={id}>{label}</label>
-              <input {...input} onChange={onChangeAmount} />
+              <input {...input} onChange={onChange} />
             </div>
           );
         };
 
-        const renderInputs = inputs => inputs.map(input => renderInput(input));
+        const renderInputs = inputs =>
+          inputs.map(input => {
+            console.log({ OO: input, inputs });
+            return renderInput(input);
+          });
         const itemsSelectedCount = itemsSelected.length;
 
         return (
