@@ -59,6 +59,7 @@
       const findRotation = ({ id }) => id === 'rotation';
 
       const byId = ({ id }) => id;
+      const bySelected = ({ selected }) => selected === true;
 
       const inOrder = inputs => [
         inputs.find(findAmount),
@@ -162,25 +163,25 @@
       };
 
       const operationOnBunniesScale = ({ bunnies }) => sourceScale => {
-        bunnies.map(({ scale }) => scale.set(sourceScale));
+        const selectedBunnies = bunnies.filter(bySelected);
+        selectedBunnies.map(({ scale }) => scale.set(sourceScale));
       };
 
       const operationOnBunniesRotation = canvas => sourceRotation => {
-        canvas.bunnies.map(bunny => {
+        canvas.bunnies.filter(bySelected).map(bunny => {
           bunny.anchor.set(0.5);
           bunny.rotation = toRadians(sourceRotation);
         });
       };
 
       const BunnyListInputs = ({ canvas }) => {
-        console.log({ fromInputs: canvas });
         const selectedBunnies = canvas.bunnies.filter(
           ({ selected }) => selected === true
         );
         const [itemsSelected, setItemsSelected] = React.useState(
           selectedBunnies
         );
-        console.log({ selectedBunnies });
+
         const [inputs, setInputs] = React.useState(DEFAULT_INPUTS);
         const prevInputs = usePrevious(inputs);
         const prevSelected = usePrevious(selectedBunnies);
