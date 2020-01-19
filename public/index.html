@@ -15,10 +15,8 @@
     <div class="canvas-root"></div>
 
     <script type="text/babel">
-      const mapKeys = f => xs =>
-        Object.fromEntries(
-          Object.entries(xs).map(([key, value]) => [f(value, key, xs), value])
-        );
+      const mapValues = f => xs =>
+        Object.entries(xs).map(([key, value]) => f(value, key, xs));
       const CANVAS_ROOT = document.querySelector('.canvas-root');
       const APP_ROOT = document.querySelector('.app-root');
       const BUNNY_SRC =
@@ -91,10 +89,13 @@
           this.interactive = true;
         }
 
-        position() {
+        position(sourceScale = 1, sourceRotation = 0) {
           let index = this.parent.getChildIndex(this);
           this.x = 30 + index * 50;
           this.y = 30;
+          this.scale.set(sourceScale);
+          this.anchor.set(0.5);
+          this.rotation = toRadians(sourceRotation);
         }
 
         get selected() {
@@ -122,7 +123,7 @@
           const ids = Array.from(Array(this.defaultNumberOfBunnies).keys());
 
           ids.map(id => {
-            const bunny = new BunnyItem(id);
+            const bunny = new BunnyItem(id, 1, 0);
             bunny.interactive = true;
             this.stage.addChild(bunny);
             bunny.position();
@@ -135,10 +136,11 @@
           );
         }
 
-        addBunny(id) {
+        addBunny({ amount: id, scale, rotation }) {
           const bunny = new BunnyItem(id);
+
           this.stage.addChild(bunny);
-          bunny.position();
+          bunny.position(scale, rotation);
         }
 
         removeBunny(sourceId) {
@@ -154,11 +156,18 @@
         };
       }
 
-      const operationOnBunniesAmount = canvas => (amount, previousAmount) => {
+      const operationOnBunniesAmount = canvas => (
+        amount,
+        previousAmount
+      ) => inputs => {
         const maybeAddOperation = amount > previousAmount;
 
+        const selectedValues = inputs.map(input => [
+          input.id,
+          Number(input.value)
+        ]);
         maybeAddOperation
-          ? canvas.addBunny(amount)
+          ? canvas.addBunny(Object.fromEntries(selectedValues))
           : canvas.removeBunny(amount);
       };
 
@@ -196,7 +205,7 @@
             return;
           }
 
-          operationOnBunniesAmount(canvas)(amount, previousAmount);
+          operationOnBunniesAmount(canvas)(amount, previousAmount)(inputs);
         };
 
         const onChangeBunniesScale = (inputs, prevInputs) => {
