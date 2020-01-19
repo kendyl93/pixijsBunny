@@ -82,10 +82,12 @@
       };
 
       class BunnyItem extends PIXI.Sprite {
-        constructor(id) {
+        constructor(id, selected = false) {
           super(PIXI.Texture.from(BUNNY_SRC));
 
           this.id = id;
+          this.selected = selected;
+          this.interactive = true;
         }
 
         position() {
@@ -102,7 +104,9 @@
           this._selected = v;
         }
 
-        // select
+        onClick = () => {
+          this._selected = true;
+        };
       }
 
       class CanvasApplication extends PIXI.Application {
@@ -118,6 +122,7 @@
 
           ids.map(id => {
             const bunny = new BunnyItem(id);
+            bunny.interactive = true;
             this.stage.addChild(bunny);
             bunny.position();
           });
@@ -138,6 +143,14 @@
         removeBunny(sourceId) {
           this.stage.removeChildAt(sourceId);
         }
+
+        selectBunny = bunny => {
+          // const maybeSelected = this.bunnies.find(
+          //   sourceBonny => sourceBonny.id === bunny.id
+          // );
+          // const { selected } = maybeSelected;
+          return (bunny.selected = true);
+        };
       }
 
       const operationOnBunniesAmount = canvas => (amount, previousAmount) => {
@@ -160,10 +173,16 @@
       };
 
       const BunnyListInputs = ({ canvas }) => {
-        const [itemsSelected, setItemsSelected] = React.useState([]);
+        console.log({ fromInputs: canvas });
+        const selectedBunnies = canvas.bunnies.filter(
+          ({ selected }) => selected === true
+        );
+        const [itemsSelected, setItemsSelected] = React.useState(
+          selectedBunnies
+        );
+        console.log({ selectedBunnies });
         const [inputs, setInputs] = React.useState(DEFAULT_INPUTS);
         const prevInputs = usePrevious(inputs);
-        console.log({ canvas });
 
         const onChangeBunniesAmount = (inputs, prevInputs) => {
           const amount = Number(inputs.find(findAmount).value);
@@ -205,6 +224,15 @@
         };
 
         React.useEffect(() => {
+          canvas.bunnies.map(bunny => {
+            bunny.on('mousedown', function(e) {
+              canvas.selectBunny(bunny);
+
+              setItemsSelected([...itemsSelected, bunny]);
+            });
+          });
+
+          console.log({ canvas });
           if (!prevInputs) {
             return;
           }
@@ -212,7 +240,7 @@
           onChangeBunniesAmount(inputs, prevInputs);
           onChangeBunniesScale(inputs, prevInputs);
           onChangeBunniesRotation(inputs, prevInputs);
-        }, [inputs]);
+        });
 
         const onChangeAmount = id => event => {
           const {
